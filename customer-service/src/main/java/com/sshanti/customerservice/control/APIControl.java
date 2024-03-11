@@ -20,7 +20,7 @@ public class APIControl {
         restTemplate = new RestTemplateBuilder().build();
     }
 
-    public ResponseEntity<ResponseMessage> callAPI(String url, HttpMethod method, Set<AccountDto> data) {
+    public ResponseEntity<Object> callAPI(String url, HttpMethod method, Set<AccountDto> data) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<Set<AccountDto>> requestEntity = new HttpEntity<>(data, headers);

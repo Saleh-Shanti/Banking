@@ -1,7 +1,6 @@
 package com.sshanti.customerservice.control;
 
 import com.sshanti.bank.exceptions.entity.EntityNotFoundException;
-import com.sshanti.bank.messages.ResponseMessage;
 import com.sshanti.bank.model.Customer;
 import com.sshanti.bank.model.dto.CustomerDto;
 import com.sshanti.bank.service.CustomerService;
@@ -58,19 +57,18 @@ public class CustomerControl {
             Customer savedCustomer = customerService.createCustomer(Customer.fromDto(customer));
             logger.info("Customer has been created successfully.");
 
-            //TODO :
-            // After creating accounts service
 
             // If there is accounts has been sent with the customer, call account service to validate and persist data.
             if (customer.getAccounts() != null && !customer.getAccounts().isEmpty()) {
                 logger.info("Validating accounts...");
-                String url = zookeeperServiceUrlProvider.serviceUrl(ZookeeperServiceUrlProvider.ACCOUNT_SERVICE) + String.format(URLMapping.ADD_NEW_ACCOUNTS.getUrl(), savedCustomer.getId());
-                ResponseEntity<ResponseMessage> responseEntity = apiControl.callAPI(url, HttpMethod.POST, customer.getAccounts());
+                String url = buildURL(savedCustomer.getId());
+                ResponseEntity<Object> responseEntity = apiControl.callAPI(url, HttpMethod.POST, customer.getAccounts());
 
                 if (!responseEntity.getStatusCode().is2xxSuccessful()) {
                     logger.error("Couldn't Add Customer, please check account service logs.");
-                    throw new ServerException(responseEntity.getBody().getMessages());
+                    throw new ServerException(Collections.singletonList("Couldn't Add Customer, please check account service logs."));
                 }
+                logger.info("Accounts for customer {} has been added successfully.", savedCustomer.getId());
             }
 
             return CustomerDto.toDto(savedCustomer);
@@ -82,8 +80,25 @@ public class CustomerControl {
 
     }
 
-    public CustomerDto updateCustomer(Long customerId, CustomerDto updatedCustomer) throws EntityNotFoundException {
+    private String buildURL(Long customerId) throws ServiceNotFoundException {
+        StringBuilder sb = new StringBuilder();
+        sb.append(zookeeperServiceUrlProvider.serviceUrl(ZookeeperServiceUrlProvider.ACCOUNT_SERVICE))
+                .append(String.format(URLMapping.ADD_NEW_ACCOUNTS.getUrl(), customerId));
 
+        return sb.toString();
+    }
+
+    public CustomerDto updateCustomer(Long customerId, CustomerDto updatedCustomer) throws EntityNotFoundException, BadRequestException {
+        logger.info("Validating Updated Customer Data ...");
+        List<String> errorMessages = customerValidator.isValidCustomer(updatedCustomer);
+        if (!errorMessages.isEmpty()) {
+            logger.error("Error updating customer due to :");
+            for (String message : errorMessages) {
+                logger.error(message);
+            }
+
+            throw new BadRequestException(errorMessages);
+        }
         return CustomerDto.toDto(customerService.updateCustomer(customerId, Customer.fromDto(updatedCustomer)));
 
     }
@@ -93,9 +108,7 @@ public class CustomerControl {
             logger.info("Deleting customer with id {}", customerId);
             Customer customer = customerService.getCustomerById(customerId);
             if (customer == null)
-                logger.info("Customer with id {} is not found",customerId);
-
-
+                logger.info("Customer with id {} is not found", customerId);
 
             customerService.deleteCustomer(customerId);
             logger.info("Customer with id {} , Deleted successfully.", customerId);

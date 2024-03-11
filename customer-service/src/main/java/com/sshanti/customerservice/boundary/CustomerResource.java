@@ -72,7 +72,11 @@ public class CustomerResource {
         try {
             logger.info("New update customer request.");
             CustomerDto updateCustomer = customerControl.updateCustomer(customerId, updatedCustomer);
+            logger.info("Customer {} has been updated successfully.", customerId);
             return ResponseEntity.status(HttpStatus.OK).body(String.format(CUSTOMER_UPDATED_SUCCESSFULLY.getMessage(), updateCustomer.getName(), updateCustomer.getCustomerId()));
+        } catch (BadRequestException be) {
+            logger.error(INVALID_VALUES_ERROR_MESSAGE.getMessage(), be.getErrorMessage().getErrors());
+            return ResponseEntity.badRequest().body(be.getErrorMessage());
         } catch (EntityNotFoundException e) {
             logger.warn(String.format(CUSTOMER_NOT_FOUND.getMessage(), customerId));
             return ResponseEntity.notFound().build();
@@ -88,10 +92,10 @@ public class CustomerResource {
     public ResponseEntity<Object> deleteCustomer(@PathVariable Long customerId) {
         try {
             logger.info("New delete customer request.");
-            boolean isDeleted = true;//
-             customerControl.deleteCustomer(customerId);
 
-            return ResponseEntity.status(HttpStatus.OK).body(String.format(isDeleted ? CUSTOMER_DELETED_SUCCESSFULLY.getMessage() : CUSTOMER_NOT_FOUND.getMessage(), customerId));
+            customerControl.deleteCustomer(customerId);
+
+            return ResponseEntity.status(HttpStatus.OK).body(String.format(CUSTOMER_DELETED_SUCCESSFULLY.getMessage(), customerId));
         } catch (ServerException | Exception e) {
             logger.warn(String.format(GENERAL_ERROR_MESSAGE.getMessage(), customerId));
             return ResponseEntity.internalServerError().build();
