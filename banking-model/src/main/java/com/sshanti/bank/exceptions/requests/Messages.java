@@ -11,7 +11,13 @@ public enum Messages {
     INVALID_CUSTOMER_TYPE("Invalid Customer Type."),
     INVALID_CUSTOMER_Gender("Invalid Customer Gender."),
     AGE_ERROR_MESSAGE("Age cannot be under 18"),
-    ERROR_PERSISTING_MESSAGE("Couldn't Save customer with data %s");
+    ERROR_PERSISTING_MESSAGE("Couldn't Save customer with data %s"),
+    ACCOUNT_NOT_FOUND("Account with id %s not found."),
+    ACCOUNT_DELETED_SUCCESSFULLY("Account with id %s for customer %s has been deleted."),
+    ACCOUNTS_ADDED_SUCCESSFULLY("Accounts for customer %s has been added successfully"),
+    ACCOUNTS_UPDATED_SUCCESSFULLY("Account %d has been added successfully"),
+    INVALID_BALANCE_ACCOUNT("Balance cannot be zero"),
+    INVALID_SALARY_ACCOUNT_TYPE("Customer can only have one salary account");
     final String message;
 
     Messages(String message) {

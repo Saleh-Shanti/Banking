@@ -41,7 +41,7 @@ public class Account {
 
     public static Account fromDto(AccountDto dto) {
         Account acc = new Account();
-//        acc.setCustomer(Long.parseLong(dto.getCustomer()));
+        acc.setCustomer(dto.getCustomer());
         acc.setType(AccountType.valueOf(dto.getAccountType().toUpperCase()));
         acc.setAccountStatus(AccountStatus.valueOf(dto.getAccountStatus().toUpperCase()));
         acc.setBalance(dto.getBalance());
