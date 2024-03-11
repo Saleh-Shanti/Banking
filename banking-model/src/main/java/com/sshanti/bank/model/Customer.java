@@ -38,7 +38,7 @@ public class Customer {
     @Enumerated(EnumType.STRING)
     private CustomerGender gender;
 
-    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
     private Set<Account> accounts = new HashSet<>();
 
     public static Customer fromDto(CustomerDto customerDto) {
